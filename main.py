@@ -1,20 +1,16 @@
 # WOL with Raspberry Pico W 
 # Micropython with Raspberry Pico W
-# 22.03.2023 jd@icplan.de
-# 17:D2:45:33:3D:9A      MAC from NAS
+# 26.03.2023 jd@icplan.de
 
-import network, socket, time, ntptime, utime, machine, os
+import network, socket, time, ntptime, utime, machine, os, secrets
 
 led = machine.Pin("LED",machine.Pin.OUT)
 led.off()
-time.sleep(2)
-
-ssid = 'Your_WLAN_Name'
-password = 'Your_WLAN_Password'
+time.sleep(1)
 
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-wlan.connect(ssid, password)
+wlan.connect(secrets.ssid, secrets.password)
     
 # Wait for connect or fail
 max_wait = 30
@@ -39,15 +35,13 @@ else:
 # Start Programm
 
 msg = [0xFF,0xFF,0xFF,0xFF,0xFF,0xFF]
-hwa = [0x17,0xD2,0x45,0x33,0x3D,0x9A]
-# broadcast = ['192.168.0.255']
 wol_port = 9
-magic = msg + (hwa * 16)
+magic = msg + (secrets.mac1 * 16)
 
 soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 for a in range (0,3,1):
     print("send magic paket")
-    soc.sendto(bytes(magic),('192.168.0.255',9))
+    soc.sendto(bytes(magic),(secrets.broadcast,9))
     time.sleep_ms(1000)
 soc.close()
 
